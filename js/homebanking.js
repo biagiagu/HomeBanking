@@ -1,6 +1,4 @@
-'use strict'
 console.log("Estoy en un archivo separado!");
-
 
 //Declaración de variables
 var nombreUsuario;
@@ -14,29 +12,16 @@ var servicioInternet = 0; // 0-Pendiente, 1-Pagado;
 var servicioLuz = 0; // 0-Pendiente, 1-Pagado;
 var servicioTelefono = 0; // 0-Pendiente, 1-Pagado;
 
-var cuentaAmiga1 = 1234567;
-var cuentaAmiga2 = 7654321;
+const cuentaAmiga1 = 1234567;
+const cuentaAmiga2 = 7654321;
+var cuentaDestino;
+const pin = 1234;
+var preguntaPin;
 
 
 //Ejecución de las funciones que actualizan los valores de las variables en el HTML.
 window.onload = function () {
-	if (!nombreUsuario) {
-		nombreUsuario = "Agustin";
-		// nombreUsuario = prompt("Escriba su nombre:");
-	}
-	cargarNombreEnPantalla();
-	if (!saldoCuenta) {
-		// montoDeposito = prompt("Cuanta plata teness en la billetera?: ");
-		// saldoCuenta = parseInt(montoDeposito, 10);
-		saldoCuenta = 25000;
-		actualizarSaldoEnPantalla();
-	}
-	if (!limiteExtraccion) {
-		// limiteExtraccion = prompt("Cual será el limite de extracción?: ");
-		// limiteExtraccion = parseInt(limiteExtraccion, 10);
-		limiteExtraccion = 3000;
-		actualizarLimiteEnPantalla();
-	}
+	iniciarSesion();	
 }
 
 //Funciones que tenes que completar
@@ -58,9 +43,7 @@ function extraerDinero() {
 		actualizarSaldo("extraccion");
 		actualizarSaldoEnPantalla();
 	}
-
 }
-
 
 function depositarDinero() {
 	preguntar("deposito");
@@ -68,47 +51,59 @@ function depositarDinero() {
 	if (!montoTransaccion || montoTransaccion == 0) {
 		return;
 	} else {
-		verificarCondiciones("deposito");
 		actualizarSaldo("deposito");
 		actualizarSaldoEnPantalla();
 	}
 }
 
-
 function pagarServicio() {
-
 	preguntar("pagarServicios"); //Preguntar qué servicio voy a pagar 
-	determinarMonto(montoTransaccion, "pagarServicios"); // Determina el costo del servicio y marca el servicio como pagado
+	determinarMonto(montoTransaccion, "pagarServicios"); // Determina el costo del servicio y marca el Ss como pagado
 	verificarCondiciones("transferencia"); // a partir de aqui el pago del servicio se trata como una transferencia por el valor del servicio.
 	actualizarSaldo("extraccion");
 	actualizarSaldoEnPantalla();
 }
 
 function transferirDinero() {
-	//preguntar monto
-	//verificar saldo
-	//preguntar numero de cuenta
-	//verificar si es cuenta amiga
-	//Actualizar Saldo
-	//mostrar saldo
 	preguntar("transferencia");
 	determinarMonto(montoTransaccion, "extraccion");
 	if (!montoTransaccion || montoTransaccion == 0) {
-		console.log("pase por aqui");
 		return;
 	} else {
 		verificarCondiciones("transferencia");
-		console.log(montoTransaccion);
-		preguntar("cuentaAmiga");
-		// actualizarSaldo("extraccion");
-		// actualizarSaldoEnPantalla();
+		if (montoTransaccion!=0){
+			preguntar("cuentaDestino");
+			if (cuentaDestino==cuentaAmiga1||cuentaDestino==cuentaAmiga2){
+				actualizarSaldo("transferencia");
+				actualizarSaldoEnPantalla();
+			}else if(!cuentaDestino){
+				return;
+			}else{
+				alert ("La cuenta "+cuentaDestino+" no es una cuenta Amiga.\nPor favor hable con su banco.")
+			}
+		}
 	}
-
-
 }
 
 function iniciarSesion() {
-
+	preguntar("pin");
+	if (preguntaPin==pin){
+		nombreUsuario = "Agustin";
+		cargarNombreEnPantalla();
+		saldoCuenta = 25000;
+		actualizarSaldoEnPantalla();
+		limiteExtraccion = 3000;
+		actualizarLimiteEnPantalla();
+		alert("Bienvenido "+nombreUsuario+"\nTu saldo inicial es de $"+saldoCuenta+"\nYa puedes comenzar a operar.");
+	}else{
+		alert("Codigo incorrecto.\nTu dinero ha sido retenido por cuestiones de seguridad");
+		nombreUsuario = "Desconocido";
+		cargarNombreEnPantalla();
+		saldoCuenta = 0;
+		actualizarSaldoEnPantalla();
+		limiteExtraccion = 3000;
+		actualizarLimiteEnPantalla();
+	}
 }
 
 
@@ -147,9 +142,15 @@ function preguntar(accion) {
 		case "transferencia":
 			textoPregunta = "Cuál es el monto a transferir: ";
 			break
-			case "cuentaAmiga":
-					textoPregunta = "Ingrese n° de cuenta de destino";
-					break;
+		case "cuentaDestino":
+			textoPregunta = "Ingrese n° de cuenta de destino";
+			cuentaDestino=prompt(textoPregunta);
+			return;
+			break;
+		case "pin":
+			textoPregunta="Ingrese su PIN: "
+			preguntaPin=prompt(textoPregunta);
+			return;
 	}
 
 	//Hace la pregunta
@@ -159,7 +160,6 @@ function preguntar(accion) {
 
 function determinarMonto(valorIngresado, accion) {
 	//esta función evalua el valor introducido por el usuario, evita errores por valores null o NaN, convierte en numerico y para la opcion de pago de servicios le asigna el valor correspondiente al servicio seleccionado. 
-
 	if (accion == "extraccion" || accion == "deposito") {
 		if (isNaN(parseInt(montoTransaccion)) || !montoTransaccion) {
 			montoTransaccion = 0;
@@ -211,11 +211,8 @@ function determinarMonto(valorIngresado, accion) {
 				}
 				break
 			default:
-				console.log("llegue al default con el valor de " + montoTransaccion);
 				if (isNaN(parseInt(montoTransaccion)) || !montoTransaccion) {
-					console.log(montoTransaccion + " entre en !montoTransaccion");
 					montoTransaccion = 0;
-					console.log(montoTransaccion + " despues de cero");
 					break;
 				} else {
 					montoTransaccion = parseInt(montoTransaccion);
@@ -230,7 +227,7 @@ function actualizarSaldo(accion) {
 	switch (accion) {
 		case "extraccion":
 			if (montoTransaccion != 0) {
-				alert("Monto a retirar: $" + (montoTransaccion * (-1)) + "; Saldo anterior: $" + saldoCuenta + "; Saldo final: $ " + (saldoCuenta - montoTransaccion))
+				alert("Monto a retirar: $" + (montoTransaccion * (-1)) + "\nSaldo anterior: $" + saldoCuenta + "\nSaldo final: $ " + (saldoCuenta - montoTransaccion))
 				saldoCuenta = saldoCuenta - montoTransaccion;
 				if (saldoCuenta < limiteExtraccion) {
 					limiteExtraccion = saldoCuenta;
@@ -240,10 +237,19 @@ function actualizarSaldo(accion) {
 			return saldoCuenta;
 		case "deposito":
 			if (montoTransaccion != 0) {
-				alert("Monto del deposito: $" + montoTransaccion + "; Saldo anterior: $" + saldoCuenta + "; Saldo final: $ " + (saldoCuenta + montoTransaccion))
+				alert("Monto del deposito: $" + montoTransaccion + "\nSaldo anterior: $" + saldoCuenta + "\n Saldo final: $ " + (saldoCuenta + montoTransaccion))
 				saldoCuenta = saldoCuenta + montoTransaccion;
 			}
 			return saldoCuenta;
+		case "transferencia":
+		if (montoTransaccion != 0) {
+			alert("Se ha transferido: $" + montoTransaccion + "\n Cuenta destino: " + cuentaDestino + "\n Saldo final: $ " + (saldoCuenta - montoTransaccion));
+			saldoCuenta = saldoCuenta - montoTransaccion;
+			if (saldoCuenta < limiteExtraccion) {
+				limiteExtraccion = saldoCuenta;
+				actualizarLimiteEnPantalla();
+			}
+		}
 	}
 }
 
@@ -258,16 +264,14 @@ function yaPago(nombreServicio) {
 function checkMultiploDeCien() {
 	if (montoTransaccion % 100 == 0) {
 		return esMultiploDeCien = true;
-
 	} else {
 		return esMultiploDeCien = false;
 	}
 }
 
 function verificarCondiciones(accion) {
-
 	if (montoTransaccion > saldoCuenta) {
-		alert("Solo te queda $" + saldoCuenta + ". Ese es tu limite para extraer.");
+		alert("Solo te queda $" + saldoCuenta + ". Ese es tu limite para extraer o transferir.");
 		montoTransaccion = 0;
 	}
 	if (accion == "extraccion") {
@@ -279,6 +283,5 @@ function verificarCondiciones(accion) {
 			montoTransaccion = 0;
 		}
 	}
-
 	return;
 }
