@@ -15,13 +15,17 @@ var servicioTelefono = 0; // 0-Pendiente, 1-Pagado;
 const cuentaAmiga1 = 1234567;
 const cuentaAmiga2 = 7654321;
 var cuentaDestino;
-const pin = 1234;
+const pinAgus = 1234;
+const pinVero = 4321;
 var preguntaPin;
 
 
 //Ejecución de las funciones que actualizan los valores de las variables en el HTML.
 window.onload = function () {
 	iniciarSesion();	
+	cargarNombreEnPantalla();
+	actualizarSaldoEnPantalla();
+	actualizarLimiteEnPantalla();
 }
 
 //Funciones que tenes que completar
@@ -87,23 +91,23 @@ function transferirDinero() {
 
 function iniciarSesion() {
 	preguntar("pin");
-	if (preguntaPin==pin){
+	if (preguntaPin==pinAgus){
 		nombreUsuario = "Agustin";
-		cargarNombreEnPantalla();
 		saldoCuenta = 25000;
-		actualizarSaldoEnPantalla();
 		limiteExtraccion = 3000;
-		actualizarLimiteEnPantalla();
-		alert("Bienvenido "+nombreUsuario+"\nTu saldo inicial es de $"+saldoCuenta+"\nYa puedes comenzar a operar.");
+	}else if(preguntaPin==pinVero){
+		nombreUsuario = "Veronica";
+		saldoCuenta = 2500000;
+		limiteExtraccion = 10000;
 	}else{
 		alert("Codigo incorrecto.\nTu dinero ha sido retenido por cuestiones de seguridad");
 		nombreUsuario = "Desconocido";
-		cargarNombreEnPantalla();
 		saldoCuenta = 0;
-		actualizarSaldoEnPantalla();
 		limiteExtraccion = 3000;
-		actualizarLimiteEnPantalla();
+		return;
 	}
+	alert("Bienvenid@ "+nombreUsuario+"\nTu saldo inicial es de $"+saldoCuenta+"\nYa puedes comenzar a operar.");
+	return;
 }
 
 
