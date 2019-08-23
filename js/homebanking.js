@@ -1,3 +1,4 @@
+'use strict'
 console.log("Estoy en un archivo separado!");
 
 
@@ -12,6 +13,10 @@ var servicioAgua = 0; // 0-Pendiente, 1-Pagado;
 var servicioInternet = 0; // 0-Pendiente, 1-Pagado;
 var servicioLuz = 0; // 0-Pendiente, 1-Pagado;
 var servicioTelefono = 0; // 0-Pendiente, 1-Pagado;
+
+var cuentaAmiga1 = 1234567;
+var cuentaAmiga2 = 7654321;
+
 
 //Ejecución de las funciones que actualizan los valores de las variables en el HTML.
 window.onload = function () {
@@ -37,36 +42,68 @@ window.onload = function () {
 //Funciones que tenes que completar
 
 function cambiarLimiteDeExtraccion() {
-	preguntarMonto("limiteExtraccion");
+	preguntar("limiteExtraccion");
 	limiteExtraccion = montoTransaccion;
 	actualizarLimiteEnPantalla();
 }
 
 
 function extraerDinero() {
-	preguntarMonto("extraccion");
-	verificarCondiciones("extraccion");
-	actualizarSaldo("extraccion");
-	actualizarSaldoEnPantalla();
+	preguntar("extraccion");
+	determinarMonto(montoTransaccion, "extraccion");
+	if (!montoTransaccion || montoTransaccion == 0) {
+		return;
+	} else {
+		verificarCondiciones("extraccion");
+		actualizarSaldo("extraccion");
+		actualizarSaldoEnPantalla();
+	}
+
 }
 
 
 function depositarDinero() {
-	preguntarMonto("deposito");
-	actualizarSaldo("deposito");
-	actualizarSaldoEnPantalla();
+	preguntar("deposito");
+	determinarMonto(montoTransaccion, "deposito");
+	if (!montoTransaccion || montoTransaccion == 0) {
+		return;
+	} else {
+		verificarCondiciones("deposito");
+		actualizarSaldo("deposito");
+		actualizarSaldoEnPantalla();
+	}
 }
 
 
 function pagarServicio() {
 
-	preguntarMonto("pagarServicios"); //Preguntar que servicio voy a pagar y Determina el costo del servicio y marcar el servicio como pagado
-	verificarCondiciones("transferencia"); // a partir de aqui el pago del servicio se trata como una transferencia por el monto del servicio.
-	actualizarSaldo("extraccion"); //Actualizar Saldo
+	preguntar("pagarServicios"); //Preguntar qué servicio voy a pagar 
+	determinarMonto(montoTransaccion, "pagarServicios"); // Determina el costo del servicio y marca el servicio como pagado
+	verificarCondiciones("transferencia"); // a partir de aqui el pago del servicio se trata como una transferencia por el valor del servicio.
+	actualizarSaldo("extraccion");
 	actualizarSaldoEnPantalla();
 }
 
 function transferirDinero() {
+	//preguntar monto
+	//verificar saldo
+	//preguntar numero de cuenta
+	//verificar si es cuenta amiga
+	//Actualizar Saldo
+	//mostrar saldo
+	preguntar("transferencia");
+	determinarMonto(montoTransaccion, "extraccion");
+	if (!montoTransaccion || montoTransaccion == 0) {
+		console.log("pase por aqui");
+		return;
+	} else {
+		verificarCondiciones("transferencia");
+		console.log(montoTransaccion);
+		preguntar("cuentaAmiga");
+		// actualizarSaldo("extraccion");
+		// actualizarSaldoEnPantalla();
+	}
+
 
 }
 
@@ -91,7 +128,9 @@ function actualizarLimiteEnPantalla() {
 
 //Funciones que ejecutan Acciones
 
-function preguntarMonto(accion) {
+function preguntar(accion) {
+	//Selecciona el txt a mostrar
+	var textoPregunta;
 	switch (accion) {
 		case "extraccion":
 			textoPregunta = "Cuanto dinero necesitas?: ";
@@ -105,52 +144,86 @@ function preguntarMonto(accion) {
 		case "pagarServicios":
 			textoPregunta = "Que servicio desea pagar: \nA- Agua \nB- Telefono \nC- Luz \nD- Internet \n";
 			break;
+		case "transferencia":
+			textoPregunta = "Cuál es el monto a transferir: ";
+			break
+			case "cuentaAmiga":
+					textoPregunta = "Ingrese n° de cuenta de destino";
+					break;
 	}
-	montoTransaccion = prompt(textoPregunta); //Hago la pregunta
-	switch (montoTransaccion) {
-		case "a":
-			if (!servicioAgua) {
-				montoTransaccion = 350;
-				servicioAgua = 1;
-				return;
-			} else {
-				yaPago("Agua");
-				return;
-			}
+
+	//Hace la pregunta
+	montoTransaccion = prompt(textoPregunta);
+	return;
+}
+
+function determinarMonto(valorIngresado, accion) {
+	//esta función evalua el valor introducido por el usuario, evita errores por valores null o NaN, convierte en numerico y para la opcion de pago de servicios le asigna el valor correspondiente al servicio seleccionado. 
+
+	if (accion == "extraccion" || accion == "deposito") {
+		if (isNaN(parseInt(montoTransaccion)) || !montoTransaccion) {
+			montoTransaccion = 0;
+			return;
+		} else {
+			montoTransaccion = parseInt(montoTransaccion);
+			return
+		}
+	} else if (accion == "pagarServicios") {
+		switch (valorIngresado) {
+			case "a":
+				if (!servicioAgua) {
+					montoTransaccion = 350;
+					servicioAgua = 1;
+					break;
+				} else {
+					yaPago("Agua");
+					break;
+				}
+				break
 			case "b":
 				if (!servicioTelefono) {
 					montoTransaccion = 425;
 					servicioTelefono = 1;
-					return;
+					break;
 				} else {
 					yaPago("Telefono");
-					return;
+					break;
 				}
-
-				case "c":
-					if (!servicioLuz) {
-						montoTransaccion = 210;
-						servicioLuz = 1;
-						return;
-					} else {
-						yaPago("Luz");
-						return;
-					}
-					case "d":
-						if (!servicioInternet) {
-							montoTransaccion = 570;
-							servicioInternet = 1;
-							return;
-						} else {
-							yaPago("Internet");
-							return;
-						}
-						default:
-							montoTransaccion = parseInt(montoTransaccion);
-
+				break
+			case "c":
+				if (!servicioLuz) {
+					montoTransaccion = 210;
+					servicioLuz = 1;
+					break;
+				} else {
+					yaPago("Luz");
+					break;
+				}
+				break
+			case "d":
+				if (!servicioInternet) {
+					montoTransaccion = 570;
+					servicioInternet = 1;
+					break;
+				} else {
+					yaPago("Internet");
+					break;
+				}
+				break
+			default:
+				console.log("llegue al default con el valor de " + montoTransaccion);
+				if (isNaN(parseInt(montoTransaccion)) || !montoTransaccion) {
+					console.log(montoTransaccion + " entre en !montoTransaccion");
+					montoTransaccion = 0;
+					console.log(montoTransaccion + " despues de cero");
+					break;
+				} else {
+					montoTransaccion = parseInt(montoTransaccion);
+					break
+				}
+		}
 	}
-
-	return;
+	return
 }
 
 function actualizarSaldo(accion) {
@@ -166,11 +239,11 @@ function actualizarSaldo(accion) {
 			}
 			return saldoCuenta;
 		case "deposito":
-			alert("Monto del deposito: $" + montoTransaccion + "; Saldo anterior: $" + saldoCuenta + "; Saldo final: $ " + (saldoCuenta + montoTransaccion))
-			saldoCuenta = saldoCuenta + montoTransaccion;
+			if (montoTransaccion != 0) {
+				alert("Monto del deposito: $" + montoTransaccion + "; Saldo anterior: $" + saldoCuenta + "; Saldo final: $ " + (saldoCuenta + montoTransaccion))
+				saldoCuenta = saldoCuenta + montoTransaccion;
+			}
 			return saldoCuenta;
-
-
 	}
 }
 
@@ -183,24 +256,21 @@ function yaPago(nombreServicio) {
 //Funciones que realizan Verificaciones
 
 function checkMultiploDeCien() {
-	console.log("estoy verificando que el monto sea multiplo de 100")
 	if (montoTransaccion % 100 == 0) {
-		console.log("Si es multiplo de 100");
 		return esMultiploDeCien = true;
 
 	} else {
-		console.log("No es multiplo de 100");
 		return esMultiploDeCien = false;
 	}
 }
 
 function verificarCondiciones(accion) {
+
 	if (montoTransaccion > saldoCuenta) {
 		alert("Solo te queda $" + saldoCuenta + ". Ese es tu limite para extraer.");
 		montoTransaccion = 0;
 	}
 	if (accion == "extraccion") {
-		console.log("Estoy verificando para Extracciones");
 		if (montoTransaccion > limiteExtraccion) {
 			alert("El monto es superior al permitido!");
 			montoTransaccion = 0;
